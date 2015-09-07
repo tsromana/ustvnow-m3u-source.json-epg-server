@@ -25,6 +25,9 @@ class MyHandler(BaseHTTPRequestHandler):
 		if 'channels.m3u' in self.path:
 			self.send_header('Content-type',	'application/x-mpegURL')
 			
+		elif 'sources.json' in self.path:
+			self.send_header('Content-type',	'application/json')
+			
 		elif self.path.startswith('/play'):
 			self.send_header('Content-type',	'application/x-mpegURL')
 			self.send_header('Accept-Ranges',	'none') # fix kodi bug
@@ -107,6 +110,52 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-Length', len(EXTM3U))
                 self.end_headers()
                 self.wfile.write(EXTM3U.encode('utf-8'))
+                                
+            elif 'sources.json' in self.path:
+
+            	host = self.headers.get('Host');
+            	
+            	EXTJSON = "[\n";
+            	
+            	try:
+
+					data = ustv.get_channels();
+
+					for i in data:
+						name 		= i["name"];
+						sname 		= i["sname"];
+						icon 		= i["icon"];
+						
+						for quality in range(1,4):
+							parameters = urllib.urlencode( { 
+								'c' 		: sname, 
+								'i'			: icon, 
+								'q' 		: str(quality), 
+								'u'			: username, 
+								'p'			: password } );
+								
+							if quality==1:
+								quality_name = 'Low';
+							elif quality==2:
+								quality_name = 'Medium';
+							elif quality==3:
+								quality_name = 'High';
+						
+							EXTJSON += '{\n"name": "' + name + '",\n"provider": "USTVNOW",\n"url": "/' + name + '_' + quality_name + '",\n';
+							EXTJSON += '"source": "http://' + host + '/play'  + base64.b64encode(parameters) + '"\n},\n';
+						
+						#print 'http://' + host + '/play'  + base64.b64encode(parameters);
+				    
+            	except Exception as e:
+						EXTJSON += 'Error\n]';
+        	
+        	    
+                self.send_response(200)
+                self.send_header('Content-type',	'application/json')
+                self.send_header('Connection',	'close')
+                self.send_header('Content-Length', len(EXTJSON))
+                self.end_headers()
+                self.wfile.write(EXTJSON.encode('utf-8'))
                                 
             elif self.path.startswith('/play'):
 				
