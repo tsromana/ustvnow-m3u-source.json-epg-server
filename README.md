@@ -10,6 +10,9 @@ Install the PVR Simple Client
 M3U Server:
 http://SERVER_IP:8787/channels.m3u?u=EMAIL&p=PASSWORD
 
+SOURCES.JSON Server
+http://SERVER_IP:8787/sources.json?u=EMAIL&p=PASSWORD
+
 EPG Server:
 http://SERVER_IP:8787/epg.xml?u=EMAIL&p=PASSWORD
 
